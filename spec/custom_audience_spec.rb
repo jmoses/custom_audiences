@@ -19,6 +19,15 @@ describe CustomAudience::CustomAudience do
 
       audience.id.should eq(5)
     end
+
+    it "fetchs attribute with token and ID" do
+      Koala::Facebook::API.stubs(:new).with('token').returns(api = stub)
+      api.expects(:get_object).with(1).returns({"name" => "test", "id" => 1})
+
+      audience = described_class.new(:id => 1, 'token' => 'token')
+
+      audience.name.should eq('test')
+    end
   end
 
   describe "#account_id=" do

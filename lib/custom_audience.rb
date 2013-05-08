@@ -66,6 +66,10 @@ module CustomAudience
 
     def add_users
       users.each_slice(1000) do |slice|
+        # TODO Use the #batch API here
+        # TODO Ensure all the calls work
+        #  * either retry failed calls, or raise an error at the end with the failed batches.
+        # TODO Find out how the API handles duplicate users (in theory they handle it fine)
         graph.put_connections id, 'users', users: JSON.dump(slice.map {|user| {"id" => user } })
       end
     end
@@ -77,9 +81,15 @@ module CustomAudience
     end
 
     def fetch_attributes!
-      return unless account_id.present? && token.present?
+      return unless token.present? && !@fetched
 
-      if match = all.detect {|audience| audience.name == name }
+      if id.present?
+        @fetched = true
+
+        @attributes = graph.get_object(id)
+      elsif account_id.present? && match = all.detect {|audience| audience.name == name }
+        @fetched = true
+
         @attributes = match.attributes
       end
     end
