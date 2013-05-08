@@ -131,5 +131,18 @@ describe CustomAudience::CustomAudience do
 
       subject.save
     end
+
+    it "adds users in batches of 1000 if there are more" do
+      batch1 = 1.upto(1000).to_a
+      batch2 = 1001.upto(2000).to_a
+
+      subject.users = (batch1 + batch2)
+      subject.stubs(exists?: true, id: 1)
+
+      api.expects(:put_connections).with(1, 'users', users: batch1.map {|i| {"id" => i}}.to_json)
+      api.expects(:put_connections).with(1, 'users', users: batch2.map {|i| {"id" => i}}.to_json)
+
+      subject.save
+    end
   end
 end

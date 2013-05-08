@@ -65,7 +65,9 @@ module CustomAudience
     end
 
     def add_users
-      graph.put_connections id, 'users', users: JSON.dump(users.map {|user| {"id" => user } })
+      users.each_slice(1000) do |slice|
+        graph.put_connections id, 'users', users: JSON.dump(slice.map {|user| {"id" => user } })
+      end
     end
 
     def all
