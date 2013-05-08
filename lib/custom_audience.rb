@@ -6,6 +6,7 @@ require 'custom_audience/version'
 
 module CustomAudience
   class CustomAudience
+    MAX_USERS_PER_REQUEST = 1000
     attr_accessor :users
     attr_reader :attributes, :token
 
@@ -25,6 +26,12 @@ module CustomAudience
       create if ! exists?
 
       add_users
+    end
+
+    def delete_users!(users)
+      users.each_slice(MAX_USERS_PER_REQUEST) do |slice|
+        graph.delete_connections id, 'users', users: user_ids_for_api(slice)
+      end
     end
 
     def account_id=(account_id)
@@ -61,12 +68,12 @@ module CustomAudience
     end
 
     def add_users
-      users.each_slice(1000) do |slice|
+      users.each_slice(MAX_USERS_PER_REQUEST) do |slice|
         # TODO Use the #batch API here
         # TODO Ensure all the calls work
         #  * either retry failed calls, or raise an error at the end with the failed batches.
         # TODO Find out how the API handles duplicate users (in theory they handle it fine)
-        graph.put_connections id, 'users', users: JSON.dump(slice.map {|user| {"id" => user } })
+        graph.put_connections id, 'users', users: user_ids_for_api(slice)
       end
     end
 
@@ -88,6 +95,10 @@ module CustomAudience
 
         @attributes = match.attributes
       end
+    end
+
+    def user_ids_for_api(users = users)
+      JSON.dump(users.map {|user| {"id" => user } })
     end
   end
 end

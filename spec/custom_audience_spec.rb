@@ -150,4 +150,20 @@ describe CustomAudience::CustomAudience do
       subject.save
     end
   end
+
+  describe "#delete_users!" do
+    let(:api) { stub }
+
+    before do
+      Koala::Facebook::API.stubs(new: api)
+    end
+
+    it "deletes users" do
+      subject.stubs(id: 1)
+
+      api.expects(:delete_connections).with(1, 'users', users: [{"id" => 5}].to_json)
+
+      subject.delete_users!([5])
+    end
+  end
 end
