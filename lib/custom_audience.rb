@@ -9,14 +9,10 @@ module CustomAudience
     attr_accessor :users
     attr_reader :attributes, :token
 
-    def initialize(name_or_hash = {})
-      if name_or_hash.is_a?(Hash)
-        @attributes = name_or_hash.stringify_keys
-      else
-        @attributes = {"name" => name_or_hash}
-      end
+    def initialize(attributes = {})
+      @attributes = attributes.stringify_keys
 
-      self.token = @attributes.delete('token')
+      self.token = attributes.delete('token')
       fetch_attributes!
     end
 

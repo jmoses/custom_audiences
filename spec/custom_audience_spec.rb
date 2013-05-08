@@ -2,10 +2,6 @@ require 'spec_helper'
 
 describe CustomAudience::CustomAudience do
   describe "#initialize" do
-    it "creates with a name" do
-      described_class.new("name").name.should eq("name")
-    end
-
     it "creates with a hash" do
       described_class.new('name' => "abc").name.should eq("abc")
     end
